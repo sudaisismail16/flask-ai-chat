@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudais AI Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0d0d0d;
+            height: 100vh;
+            display: flex;
+            color: #e0e0e0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #111111;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 15px;
+            border-right: 1px solid #222;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #6c47ff, #a78bfa);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .new-chat-btn {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+        }
+
+        .new-chat-btn:hover { background: #2a2a2a; }
+
+        .sidebar-label {
+            font-size: 11px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            padding: 0 5px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            border-top: 1px solid #222;
+            padding-top: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6c47ff, #a78bfa);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #e0e0e0;
+        }
+
+        /* Main Chat Area */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0d0d0d;
+        }
+
+        /* Header */
+        .chat-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #1e1e1e;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .model-badge {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #a78bfa;
+            font-weight: 500;
+        }
+
+        /* Messages */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .chat-messages::-webkit-scrollbar { width: 4px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+        .message-row {
+            padding: 16px 24px;
+            display: flex;
+            gap: 16px;
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .message-row.user { justify-content: flex-end; }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .avatar.bot {
+            background: linear-gradient(135deg, #6c47ff, #a78bfa);
+            color: white;
+        }
+
+        .avatar.user {
+            background: #2a2a2a;
+            border: 1px solid #333;
+        }
+
+        .message-content {
+            max-width: 75%;
+        }
+
+        .message-name {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .user .message-bubble {
+            background: #6c47ff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot .message-bubble {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border: 1px solid #2a2a2a;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #444;
+            margin-top: 5px;
+        }
+
+        /* Welcome Screen */
+        .welcome {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px;
+        }
+
+        .welcome-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6c47ff, #a78bfa);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .welcome h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .welcome p {
+            font-size: 15px;
+            color: #555;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .suggestion-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .suggestion-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .suggestion-card:hover {
+            background: #222;
+            border-color: #6c47ff;
+            color: #e0e0e0;
+        }
+
+        .suggestion-card .icon { font-size: 18px; margin-bottom: 6px; }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px 24px;
+            border-top: 1px solid #1e1e1e;
+        }
+
+        .input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 16px;
+            display: flex;
+            align-items: flex-end;
+            padding: 12px 16px;
+            gap: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #6c47ff;
+        }
+
+        .input-wrapper textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            resize: none;
+            outline: none;
+            max-height: 120px;
+            line-height: 1.5;
+        }
+
+        .input-wrapper textarea::placeholder { color: #444; }
+
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            background: #6c47ff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover { background: #7c57ff; }
+        .send-btn:disabled { background: #2a2a2a; cursor: not-allowed; }
+
+        .send-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        .input-footer {
+            text-align: center;
+            font-size: 11px;
+            color: #333;
+            margin-top: 10px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding: 12px 16px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #555;
+            border-radius: 50%;
+            animation: typing 1.2s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 100% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-4px); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">🤖</div>
+        <span class="logo-text">Sudais AI</span>
+    </div>
+
+    <button class="new-chat-btn" onclick="clearChat()">
+        ✏️ New Chat
+    </button>
+
+    <div class="sidebar-label">Recent</div>
+
+    <div class="sidebar-bottom">
+        <div class="user-info">
+            <div class="user-avatar">S</div>
+            <span class="user-name">Sudais Ismail</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+    <div class="chat-header">
+        <span style="font-size:14px; font-weight:500; color:#aaa;">Sudais AI Chat</span>
+        <span class="model-badge">⚡ LLaMA 3.3-70b</span>
+    </div>
+
+    <div class="chat-messages" id="messages">
+        <!-- Welcome Screen -->
+        <div class="welcome" id="welcome">
+            <div class="welcome-icon">🤖</div>
+            <h1>How can I help you?</h1>
+            <p>Ask me anything — I'm powered by LLaMA 3.3 and ready to assist.</p>
+            <div class="suggestion-grid">
+                <div class="suggestion-card" onclick="suggest(this)">
+                    <div class="icon">💡</div>
+                    Explain a concept to me
+                </div>
+                <div class="suggestion-card" onclick="suggest(this)">
+                    <div class="icon">✍️</div>
+                    Help me write something
+                </div>
+                <div class="suggestion-card" onclick="suggest(this)">
+                    <div class="icon">🐛</div>
+                    Debug my code
+                </div>
+                <div class="suggestion-card" onclick="suggest(this)">
+                    <div class="icon">📊</div>
+                    Summarize a topic
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-wrapper">
+            <textarea id="userInput" placeholder="Message Sudais AI..." rows="1"
+                onkeydown="handleKey(event)"
+                oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                <svg viewBox="0 0 24 24"><path d="M2 21L23 12 2 3v7l15 2-15 2v7z"/></svg>
+            </button>
+        </div>
+        <div class="input-footer">Sudais AI can make mistakes. Powered by Groq & LLaMA 3.3</div>
+    </div>
+</div>
+
+<script>
+    function autoResize(el) {
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    function handleKey(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    }
+
+    function suggest(el) {
+        const text = el.innerText.trim();
+        document.getElementById('userInput').value = text;
+        sendMessage();
+    }
+
+    function getTime() {
+        return new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+
+    function addMessage(text, role) {
+        const welcome = document.getElementById('welcome');
+        if (welcome) welcome.remove();
+
+        const messages = document.getElementById('messages');
+        const isUser = role === 'user';
+
+        const row = document.createElement('div');
+        row.className = `message-row ${role}`;
+        row.innerHTML = `
+            ${!isUser ? `<div class="avatar bot">🤖</div>` : ''}
+            <div class="message-content">
+                <div class="message-name">${isUser ? 'You' : 'Sudais AI'}</div>
+                <div class="message-bubble">${text}</div>
+                <div class="message-time">${getTime()}</div>
+            </div>
+            ${isUser ? `<div class="avatar user">S</div>` : ''}
+        `;
+        messages.appendChild(row);
+        messages.scrollTop = messages.scrollHeight;
+        return row;
+    }
+
+    function addTyping() {
+        const welcome = document.getElementById('welcome');
+        if (welcome) welcome.remove();
+
+        const messages = document.getElementById('messages');
+        const row = document.createElement('div');
+        row.className = 'message-row bot';
+        row.id = 'typing-row';
+        row.innerHTML = `
+            <div class="avatar bot">🤖</div>
+            <div class="message-content">
+                <div class="message-name">Sudais AI</div>
+                <div class="message-bubble">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        messages.appendChild(row);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        input.style.height = 'auto';
+        sendBtn.disabled = true;
+
+        addMessage(text, 'user');
+        addTyping();
+
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await response.json();
+            document.getElementById('typing-row')?.remove();
+            addMessage(data.reply, 'bot');
+        } catch (err) {
+            document.getElementById('typing-row')?.remove();
+            addMessage('Sorry, something went wrong. Please try again.', 'bot');
+        }
+
+        sendBtn.disabled = false;
+        input.focus();
+    }
+
+    async function clearChat() {
+        await fetch('/clear', { method: 'POST' });
+        const messages = document.getElementById('messages');
+        messages.innerHTML = `
+            <div class="welcome" id="welcome">
+                <div class="welcome-icon">🤖</div>
+                <h1>How can I help you?</h1>
+                <p>Ask me anything — I'm powered by LLaMA 3.3 and ready to assist.</p>
+                <div class="suggestion-grid">
+                    <div class="suggestion-card" onclick="suggest(this)">
+                        <div class="icon">💡</div>
+                        Explain a concept to me
+                    </div>
+                    <div class="suggestion-card" onclick="suggest(this)">
+                        <div class="icon">✍️</div>
+                        Help me write something
+                    </div>
+                    <div class="suggestion-card" onclick="suggest(this)">
+                        <div class="icon">🐛</div>
+                        Debug my code
+                    </div>
+                    <div class="suggestion-card" onclick="suggest(this)">
+                        <div class="icon">📊</div>
+                        Summarize a topic
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+</script>
+</body>
+</html>
